@@ -110,8 +110,17 @@ pipeline {
                     echo "--- ESLint ---"
                     npx eslint src tests --format stylish | tee reports/eslint.txt
                 '''
-                withSonarQubeEnv('SonarQube') {
-                    sh 'npx sonarqube-scanner -Dsonar.projectVersion=${RELEASE_VERSION}'
+                                withSonarQubeEnv('SonarQube') {
+                    sh '''
+                        npx sonarqube-scanner \
+                          -Dsonar.projectKey=spacebook-api \
+                          -Dsonar.projectVersion=${RELEASE_VERSION} \
+                          -Dsonar.sources=src \
+                          -Dsonar.tests=tests \
+                          -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+                          -Dsonar.exclusions=node_modules/**,coverage/**,reports/**,dist/**,scripts/**,jenkins/**,monitoring/** \
+                          -Dsonar.coverage.exclusions=tests/**,src/server.js,scripts/**
+                    '''
                 }
                 timeout(time: 5, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
