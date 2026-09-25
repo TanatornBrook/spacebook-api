@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        sonarRunner 'SonarScanner'
+        sonar 'SonarScanner'
     }
 
     stages {
