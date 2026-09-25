@@ -1,0 +1,47 @@
+groups:
+  - name: spacebook-availability
+    rules:
+      - alert: SpaceBookProductionDown
+        expr: up{job="spacebook-prod"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Production API is not responding"
+          description: "Prometheus has failed to scrape the production API for more than one minute."
+
+      - alert: SpaceBookHighErrorRate
+        expr: |
+          sum(rate(spacebook_http_requests_total{job="spacebook-prod",status=~"5.."}[5m]))
+          /
+          sum(rate(spacebook_http_requests_total{job="spacebook-prod"}[5m])) > 0.05
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "More than 5 percent of requests are failing"
+          description: "The production API has returned server errors for over 5 percent of requests in the last five minutes."
+
+  - name: spacebook-performance
+    rules:
+      - alert: SpaceBookSlowResponses
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum(rate(spacebook_http_request_duration_seconds_bucket{job="spacebook-prod"}[5m])) by (le)
+          ) > 1
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "95th percentile response time is above one second"
+          description: "Slow responses usually point at a resource problem on the container host."
+
+      - alert: SpaceBookMemoryGrowth
+        expr: spacebook_process_resident_memory_bytes{job="spacebook-prod"} > 400000000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container memory use is approaching its limit"
+          description: "Resident memory has stayed above 400 MB against a 512 MB container limit."

@@ -1,0 +1,45 @@
+services:
+  prometheus:
+    build:
+      context: ./monitoring
+      dockerfile: prometheus.Dockerfile
+    image: spacebook-prometheus:latest
+    container_name: spacebook-prometheus
+    restart: unless-stopped
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=7d"
+    volumes:
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - spacebook-net
+
+  grafana:
+    build:
+      context: ./monitoring
+      dockerfile: grafana.Dockerfile
+    image: spacebook-grafana:latest
+    container_name: spacebook-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3002:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - spacebook-net
+
+volumes:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  spacebook-net:
+    external: true

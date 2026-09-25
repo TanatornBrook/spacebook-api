@@ -1,0 +1,4 @@
+# Vulnerabilities accepted after review are listed here with the reason and the
+# date they were last checked. Nothing is listed at present; if the Security
+# stage reports a finding that has no upstream fix, record it here rather than
+# lowering the failure threshold for the whole pipeline.

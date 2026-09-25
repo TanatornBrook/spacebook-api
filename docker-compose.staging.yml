@@ -1,0 +1,24 @@
+services:
+  spacebook-staging:
+    image: ${IMAGE_NAME:-spacebook-api}:${IMAGE_TAG:-latest}
+    container_name: spacebook-staging
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      PORT: 3000
+      JWT_SECRET: ${STAGING_JWT_SECRET:-staging-secret-not-for-production}
+      ADMIN_PASSWORD: ${STAGING_ADMIN_PASSWORD:-StagingAdmin123!}
+      APP_VERSION: ${IMAGE_TAG:-latest}
+    ports:
+      - "3001:3000"
+    networks:
+      - spacebook-net
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:3000/health"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+
+networks:
+  spacebook-net:
+    external: true

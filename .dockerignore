@@ -1,0 +1,12 @@
+node_modules
+coverage
+reports
+dist
+.git
+.gitignore
+*.md
+Jenkinsfile
+docker-compose*.yml
+monitoring
+jenkins
+.trivyignore
